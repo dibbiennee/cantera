@@ -698,10 +698,14 @@ export default function App() {
                 <div style={css('position:absolute;bottom:0;left:28%;right:28%;height:52px;border:2px solid rgba(255,255,255,.3);border-bottom:none;border-radius:8px 8px 0 0')}></div>
                 {girls.map((g, i) => {
                   const s = SLOTS[i] || SLOTS[9];
+                  const avg = CATS.reduce((t, [k]) => t + g.stats[k], 0) / CATS.length;
                   return (
                     <button key={g.id} onClick={() => { tap(); setRosaGirl(g.id); }} style={{ ...css('position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;transform:translate(-50%,-50%)'), top: s.top, left: s.left }}>
-                      <div style={{ ...css('width:48px;height:48px;border-radius:50%;border:2px solid #15131a;box-shadow:2px 2px 0 #15131a;display:flex;align-items:center;justify-content:center;overflow:hidden'), background: `linear-gradient(160deg,${g.c1},${g.c2})` }}>{av(g, 42)}</div>
-                      <div style={css("font-size:9.5px;font-weight:700;color:#fff;text-shadow:1px 1px 0 #15131a;font-family:'Space Mono',monospace")}>{g.name}</div>
+                      <div style={{ ...css('position:relative;width:56px;padding:6px 4px 5px;border-radius:11px;border:2px solid #15131a;box-shadow:2px 2px 0 #15131a;display:flex;flex-direction:column;align-items:center'), background: `linear-gradient(160deg,${g.c1},${g.c2})` }}>
+                        <div style={css("position:absolute;top:3px;left:5px;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;line-height:1;color:#15131a")}>{ov(g.stats)}</div>
+                        <div style={css('width:38px;height:38px;margin-top:6px;border-radius:50%;background:rgba(255,255,255,.32);border:1px solid #15131a;display:flex;align-items:center;justify-content:center;overflow:hidden')}>{av(g, 34)}</div>
+                      </div>
+                      <div style={css("font-size:10px;font-weight:700;color:#fff;text-shadow:1px 1px 0 #15131a;font-family:'Space Mono',monospace")}>★ {avg.toFixed(1)}</div>
                     </button>
                   );
                 })}
