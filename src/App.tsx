@@ -75,6 +75,19 @@ export default function App() {
   const [musicOn, setMusicOn] = useState(false);
   const [matchMode, setMatchMode] = useState<'local' | 'online'>('local');
 
+  // PWA: guida "Aggiungi alla Home", mostrata una sola volta e mai in standalone.
+  const [showGuide, setShowGuide] = useState(() => {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches
+      || (navigator as unknown as { standalone?: boolean }).standalone === true;
+    let seen = false;
+    try { seen = !!localStorage.getItem('cantera_guide_seen'); } catch { /* no-op */ }
+    return !standalone && !seen;
+  });
+  const dismissGuide = () => {
+    try { localStorage.setItem('cantera_guide_seen', '1'); } catch { /* no-op */ }
+    setShowGuide(false);
+  };
+
   const [lm, setLm] = useState<LocalMatch>(FRESH_MATCH);
   const lmRef = useRef(lm);
   lmRef.current = lm;
@@ -270,6 +283,7 @@ export default function App() {
     const ml = authMode === 'login', mr = authMode === 'register', mf = authMode === 'forgot';
     return (
       <Shell>
+        {showGuide && <GuideOverlay onClose={dismissGuide} mascot={av(girl('aurora'), 72)} />}
         <div style={css('position:relative;z-index:2;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;animation:slidein .4s ease both;padding:24px 0')}>
           <div style={css('text-align:center;margin-bottom:6px')}><div style={css('display:inline-block;animation:bob 3s ease-in-out infinite')}>{av(girl('aurora'), 96)}</div></div>
           <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:44px;letter-spacing:-1px;text-align:center;line-height:.9")}>CAN<span style={{ color: '#c6ff3d' }}>TERA</span></div>
@@ -341,6 +355,7 @@ export default function App() {
 
   return (
     <Shell>
+      {showGuide && <GuideOverlay onClose={dismissGuide} mascot={av(girl('aurora'), 72)} />}
       <div style={css('position:relative;z-index:2')}>
         <div style={css('display:flex;align-items:center;justify-content:space-between;padding:18px 2px 14px')}>
           <div style={css('display:flex;align-items:center;gap:10px')}>
@@ -731,6 +746,33 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div style={css('position:absolute;top:280px;right:-70px;width:220px;height:220px;border-radius:50%;background:#ff4d9d;filter:blur(90px);opacity:.26;pointer-events:none')}></div>
         <div style={css('position:absolute;top:560px;left:-40px;width:200px;height:200px;border-radius:50%;background:#c6ff3d;filter:blur(90px);opacity:.14;pointer-events:none')}></div>
         {children}
+      </div>
+    </div>
+  );
+}
+
+// Popup guida "Aggiungi alla Home" (mostrato una sola volta, sopra ogni schermata).
+function GuideOverlay({ onClose, mascot }: { onClose: () => void; mascot: React.ReactNode }) {
+  const steps: { n: number; c: string; t: React.ReactNode }[] = [
+    { n: 1, c: '#c6ff3d', t: <>Su Safari tocca <b>Condividi</b> (quadrato con freccia ↑)</> },
+    { n: 2, c: '#ff4d9d', t: <>Scegli <b>"Aggiungi a Home"</b></> },
+    { n: 3, c: '#9b6bff', t: <>Apri <b>CANTERA</b> dalla nuova icona ⚡</> },
+  ];
+  return (
+    <div style={css('position:fixed;inset:0;z-index:1000;background:rgba(11,9,16,.86);display:flex;align-items:center;justify-content:center;padding:20px')}>
+      <div style={css("width:100%;max-width:360px;background:#17131f;border:3px solid #15131a;box-shadow:7px 7px 0 #15131a;border-radius:24px;padding:24px;animation:slidein .35s ease both")}>
+        <div style={css('text-align:center;margin-bottom:6px')}><div style={css('display:inline-block;animation:bob 3s ease-in-out infinite')}>{mascot}</div></div>
+        <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:22px;line-height:1.05;text-align:center;margin-bottom:18px")}>Aggiungi CANTERA alla Home 📲</div>
+        <div style={css('display:flex;flex-direction:column;gap:12px;margin-bottom:14px')}>
+          {steps.map((s) => (
+            <div key={s.n} style={css('display:flex;align-items:center;gap:12px')}>
+              <div style={{ ...css("flex:0 0 auto;width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-weight:700;color:#15131a"), background: s.c }}>{s.n}</div>
+              <div style={css('font-size:13.5px;color:#f4f1ea;line-height:1.25')}>{s.t}</div>
+            </div>
+          ))}
+        </div>
+        <div style={css("font-size:11.5px;color:#9a90ab;text-align:center;margin-bottom:16px;font-family:'Space Mono',monospace")}>Android: menu ⋮ → Installa app</div>
+        <button onClick={onClose} style={css("width:100%;padding:15px;border-radius:16px;background:#c6ff3d;color:#15131a;border:3px solid #15131a;box-shadow:5px 5px 0 #15131a;font-family:'Syne',sans-serif;font-weight:800;font-size:16px")}>HO CAPITO ⚡</button>
       </div>
     </div>
   );
