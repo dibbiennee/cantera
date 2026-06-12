@@ -6,13 +6,13 @@ import { ov, pick2 } from './game';
 import { useLeague } from './useLeague';
 import { useRoom } from './useRoom';
 import {
-  ORDER, PCOL, PNAME, UKEY, MODULES, ROLECOL, CATS, HAIRS, ACCPAL, STYLES, ACCS,
+  ORDER, PCOL, PNAME, UKEY, MODULES, ROLECOL, CATS,
 } from './constants';
 import type { Girl, ShootOutcome, StatKey } from './types';
 
 type Screen =
   | 'home' | 'draft_mode' | 'lobby' | 'wait' | 'draft_setup' | 'formation'
-  | 'draft' | 'shootout' | 'result' | 'fanta' | 'admin' | 'auction' | 'studio' | 'stats';
+  | 'draft' | 'shootout' | 'result' | 'fanta' | 'admin' | 'auction' | 'rosa';
 
 interface LocalMatch {
   slots: number[];
@@ -97,8 +97,7 @@ export default function App() {
   const [newEvLabel, setNewEvLabel] = useState('');
   const [newEvPts, setNewEvPts] = useState(3);
   const [adminGirl, setAdminGirl] = useState('aurora');
-  const [studioGirl, setStudioGirl] = useState('aurora');
-  const [statsGirl, setStatsGirl] = useState('aurora');
+  const [rosaGirl, setRosaGirl] = useState<string | null>(null);
   const [joinCode, setJoinCode] = useState('');
 
   const R = useRoom(currentUser, girls);
@@ -258,7 +257,6 @@ export default function App() {
   };
   const confirmVoto = () => addEvent('Voto G' + L.league.giornata, votoVal);
   const setStat = (k: StatKey, v: number) => { tap(); const g = girl(adminGirl); L.setGirl(g.id, { stats: { ...g.stats, [k]: Math.max(1, Math.min(6, v)) } }); };
-  const setStatFor = (k: StatKey, v: number) => { tap(); const g = girl(statsGirl); L.setGirl(g.id, { stats: { ...g.stats, [k]: Math.max(1, Math.min(6, v)) } }); };
   const addEv = () => { const l = (newEvLabel || '').trim(); if (!l) return; tap(); L.setEvents([...events, { label: l, pts: newEvPts }]); setNewEvLabel(''); };
   const removeEv = (i: number) => { tap(); L.setEvents(events.filter((_, k) => k !== i)); };
 
@@ -395,7 +393,7 @@ export default function App() {
               <div style={css("display:inline-block;margin-top:12px;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;background:#15131a;color:#ff4d9d;padding:7px 14px;border-radius:11px")}>CLASSIFICA 🏆</div>
             </button>
 
-            <button onClick={() => go('studio')} style={css('width:100%;padding:15px;border-radius:18px;background:#17131f;border:2px dashed #3a3350;font-weight:700;font-size:13px;color:#b9b0c8')}>✎  Studio personaggio — vesti le ragazze</button>
+            <button onClick={() => { setRosaGirl(null); go('rosa'); }} style={css('width:100%;padding:15px;border-radius:18px;background:#17131f;border:2px dashed #3a3350;font-weight:700;font-size:13px;color:#b9b0c8')}>👥  Rosa — giugno 2026</button>
           </div>
         )}
 
@@ -679,56 +677,51 @@ export default function App() {
           );
         })()}
 
-        {/* STUDIO */}
-        {screen === 'studio' && (() => {
-          const sg = girl(studioGirl);
+        {/* ROSA — giugno 2026 */}
+        {screen === 'rosa' && (() => {
+          // Formazione: ATT(3) · CEN(3) · DIF(3) · POR(1), mappata su girls[0..9].
+          const SLOTS = [
+            { top: '19%', left: '26%' }, { top: '15%', left: '50%' }, { top: '19%', left: '74%' },
+            { top: '42%', left: '20%' }, { top: '40%', left: '50%' }, { top: '42%', left: '80%' },
+            { top: '65%', left: '26%' }, { top: '63%', left: '50%' }, { top: '65%', left: '74%' },
+            { top: '86%', left: '50%' },
+          ];
+          const sel = rosaGirl ? girl(rosaGirl) : null;
           return (
             <div style={css('animation:slidein .35s ease both')}>
-              <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:26px;line-height:1;margin:2px 2px 12px")}>Studio personaggio</div>
-              <div style={css('display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px')}>
-                {girls.map((g) => <button key={g.id} onClick={() => { tap(); setStudioGirl(g.id); }} style={{ ...css('flex:0 0 auto;width:50px;height:50px;border-radius:14px;background:#17131f;display:flex;align-items:center;justify-content:center;overflow:hidden'), border: `3px solid ${studioGirl === g.id ? '#c6ff3d' : '#2a2436'}` }}>{av(g, 40)}</button>)}
+              <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:28px;line-height:1;margin:2px 2px 2px")}>Rosa</div>
+              <div style={css("font-family:'Space Mono',monospace;font-size:11px;color:#9a90ab;margin:0 2px 14px")}>GIUGNO 2026 · LA SQUADRA</div>
+              <div style={css('position:relative;width:100%;height:540px;border-radius:22px;overflow:hidden;background:linear-gradient(#3f973f,#2c722c);border:3px solid #15131a;box-shadow:6px 6px 0 #15131a')}>
+                <div style={css('position:absolute;top:50%;left:6%;right:6%;height:2px;background:rgba(255,255,255,.35)')}></div>
+                <div style={css('position:absolute;top:50%;left:50%;width:96px;height:96px;border:2px solid rgba(255,255,255,.35);border-radius:50%;transform:translate(-50%,-50%)')}></div>
+                <div style={css('position:absolute;top:0;left:28%;right:28%;height:52px;border:2px solid rgba(255,255,255,.3);border-top:none;border-radius:0 0 8px 8px')}></div>
+                <div style={css('position:absolute;bottom:0;left:28%;right:28%;height:52px;border:2px solid rgba(255,255,255,.3);border-bottom:none;border-radius:8px 8px 0 0')}></div>
+                {girls.map((g, i) => {
+                  const s = SLOTS[i] || SLOTS[9];
+                  return (
+                    <button key={g.id} onClick={() => { tap(); setRosaGirl(g.id); }} style={{ ...css('position:absolute;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;transform:translate(-50%,-50%)'), top: s.top, left: s.left }}>
+                      <div style={{ ...css('width:48px;height:48px;border-radius:50%;border:2px solid #15131a;box-shadow:2px 2px 0 #15131a;display:flex;align-items:center;justify-content:center;overflow:hidden'), background: `linear-gradient(160deg,${g.c1},${g.c2})` }}>{av(g, 42)}</div>
+                      <div style={css("font-size:9.5px;font-weight:700;color:#fff;text-shadow:1px 1px 0 #15131a;font-family:'Space Mono',monospace")}>{g.name}</div>
+                    </button>
+                  );
+                })}
               </div>
-              <div style={{ ...css("text-align:center;padding:14px;border-radius:22px;border:3px solid #15131a;box-shadow:6px 6px 0 #15131a;margin-bottom:16px"), background: `linear-gradient(160deg,${sg.c1},${sg.c2})` }}>
-                <div style={css('width:150px;height:150px;margin:0 auto;border-radius:50%;background:rgba(255,255,255,.3);border:3px solid #15131a;display:flex;align-items:center;justify-content:center;overflow:hidden')}>{av(sg, 150)}</div>
-                <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#15131a;text-transform:uppercase;margin-top:8px")}>{sg.name}</div>
-              </div>
-              <div style={css("font-size:11px;font-family:'Space Mono',monospace;color:#8a8198;margin:0 2px 7px")}>CAPELLI</div>
-              <div style={css('display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px')}>{HAIRS.map((c) => <button key={c} onClick={() => { tap(); L.setGirl(sg.id, { hair: c }); }} style={{ ...css('width:34px;height:34px;border-radius:50%'), background: c, border: `3px solid ${sg.hair === c ? '#c6ff3d' : '#15131a'}` }}></button>)}</div>
-              <div style={css("font-size:11px;font-family:'Space Mono',monospace;color:#8a8198;margin:0 2px 7px")}>ACCONCIATURA</div>
-              <div style={css('display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px')}>{STYLES.map(([v, label]) => { const on = sg.style === v; return <button key={v} onClick={() => { tap(); L.setGirl(sg.id, { style: v }); }} style={{ ...css('padding:9px 14px;border-radius:12px;font-size:12px;font-weight:700'), background: on ? '#c6ff3d' : '#17131f', border: `2px solid ${on ? '#c6ff3d' : '#2a2436'}`, color: on ? '#15131a' : '#b9b0c8' }}>{label}</button>; })}</div>
-              <div style={css("font-size:11px;font-family:'Space Mono',monospace;color:#8a8198;margin:0 2px 7px")}>ACCESSORIO</div>
-              <div style={css('display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px')}>{ACCS.map(([v, label]) => { const on = sg.acc === v; return <button key={v} onClick={() => { tap(); L.setGirl(sg.id, { acc: v }); }} style={{ ...css('padding:9px 14px;border-radius:12px;font-size:12px;font-weight:700'), background: on ? '#c6ff3d' : '#17131f', border: `2px solid ${on ? '#c6ff3d' : '#2a2436'}`, color: on ? '#15131a' : '#b9b0c8' }}>{label}</button>; })}</div>
-              <div style={css("font-size:11px;font-family:'Space Mono',monospace;color:#8a8198;margin:0 2px 7px")}>COLORE ACCESSORIO</div>
-              <div style={css('display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px')}>{ACCPAL.map((c) => <button key={c} onClick={() => { tap(); L.setGirl(sg.id, { accC: c }); }} style={{ ...css('width:34px;height:34px;border-radius:50%'), background: c, border: `3px solid ${sg.accC === c ? '#c6ff3d' : '#3a3350'}` }}></button>)}</div>
-              <div style={css('display:flex;gap:10px;margin-bottom:14px')}>
-                <button onClick={() => { tap(); L.setGirl(sg.id, { gl: !sg.gl }); }} style={{ ...css('flex:1;padding:13px;border-radius:14px;font-size:13px;font-weight:700'), background: sg.gl ? '#c6ff3d' : '#17131f', border: `2px solid ${sg.gl ? '#c6ff3d' : '#2a2436'}`, color: sg.gl ? '#15131a' : '#b9b0c8' }}>👓 Occhiali</button>
-                <button onClick={() => { tap(); L.setGirl(sg.id, { ear: !sg.ear }); }} style={{ ...css('flex:1;padding:13px;border-radius:14px;font-size:13px;font-weight:700'), background: sg.ear ? '#c6ff3d' : '#17131f', border: `2px solid ${sg.ear ? '#c6ff3d' : '#2a2436'}`, color: sg.ear ? '#15131a' : '#b9b0c8' }}>💎 Orecchini</button>
-              </div>
-              <button onClick={() => { tap(); setStatsGirl(studioGirl); setScreen('stats'); }} style={css("width:100%;padding:15px;border-radius:16px;background:#9b6bff;color:#15131a;border:3px solid #15131a;box-shadow:4px 4px 0 #15131a;font-family:'Syne',sans-serif;font-weight:800")}>✎ MODIFICA LE STATS</button>
-            </div>
-          );
-        })()}
+              <div style={css('text-align:center;font-size:11px;color:#6a6478;margin-top:10px')}>Tocca una giocatrice per vedere la sua card</div>
 
-        {/* STATS */}
-        {screen === 'stats' && (() => {
-          const stg = girl(statsGirl);
-          return (
-            <div style={css('animation:slidein .35s ease both')}>
-              <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:26px;line-height:1;margin:2px 2px 12px")}>Modifica STATS</div>
-              <div style={css('display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px')}>
-                {girls.map((g) => <button key={g.id} onClick={() => { tap(); setStatsGirl(g.id); }} style={{ ...css('flex:0 0 auto;width:50px;height:50px;border-radius:14px;background:#17131f;display:flex;align-items:center;justify-content:center;overflow:hidden'), border: `3px solid ${statsGirl === g.id ? '#c6ff3d' : '#2a2436'}` }}>{av(g, 40)}</button>)}
-              </div>
-              <div style={{ ...css("position:relative;text-align:center;padding:16px;border-radius:22px;border:3px solid #15131a;box-shadow:6px 6px 0 #15131a;margin-bottom:16px"), background: `linear-gradient(160deg,${stg.c1},${stg.c2})` }}>
-                <div style={css("position:absolute;top:12px;left:14px;font-family:'Space Mono',monospace;font-weight:700;font-size:26px;color:#15131a")}>{ov(stg.stats)}</div>
-                <div style={css('width:96px;height:96px;margin:0 auto;border-radius:50%;background:rgba(255,255,255,.3);border:3px solid #15131a;display:flex;align-items:center;justify-content:center;overflow:hidden')}>{av(stg, 88)}</div>
-                <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#15131a;text-transform:uppercase;margin-top:6px")}>{stg.name}</div>
-              </div>
-              <div style={css('display:flex;flex-direction:column;gap:11px;margin-bottom:16px')}>
-                {CATS.map(([k, label, emoji]) => (
-                  <div key={k} style={css('display:flex;align-items:center;justify-content:space-between;gap:10px')}><span style={css('flex:1;font-size:14px;font-weight:700')}>{emoji + ' ' + label}</span><div style={css('display:flex;gap:4px')}>{[1, 2, 3, 4, 5, 6].map((n) => <button key={n} onClick={() => setStatFor(k, n)} style={{ ...css('font-size:22px;line-height:1;background:none;padding:0'), color: n <= stg.stats[k] ? (n === 6 ? '#9fe8ff' : '#ffd23f') : '#3a3350' }}>{n === 6 ? '✦' : '★'}</button>)}</div></div>
-                ))}
-              </div>
-              <button onClick={() => go('studio')} style={css("width:100%;padding:15px;border-radius:16px;background:#c6ff3d;color:#15131a;border:3px solid #15131a;box-shadow:4px 4px 0 #15131a;font-family:'Syne',sans-serif;font-weight:800")}>‹ TORNA ALLO STUDIO</button>
+              {sel && (
+                <div onClick={() => setRosaGirl(null)} style={css('position:fixed;inset:0;z-index:900;background:rgba(11,9,16,.86);display:flex;align-items:center;justify-content:center;padding:24px')}>
+                  <div onClick={(e) => e.stopPropagation()} style={{ ...css("position:relative;width:100%;max-width:280px;text-align:center;padding:16px 14px;border-radius:24px;border:3px solid #15131a;box-shadow:7px 7px 0 #15131a;overflow:hidden;animation:pop .3s ease both"), background: `linear-gradient(160deg,${sel.c1},${sel.c2})` }}>
+                    <div style={css('display:flex;justify-content:space-between;align-items:flex-start')}><div style={css("font-family:'Space Mono',monospace;font-weight:700;font-size:30px;line-height:1;color:#15131a")}>{ov(sel.stats)}</div><div style={{ ...css("font-family:'Space Mono',monospace;font-size:9px;background:#15131a;padding:3px 7px;border-radius:7px"), color: sel.c1 }}>{sel.role}</div></div>
+                    <div style={css('width:112px;height:112px;margin:6px auto;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid #15131a;display:flex;align-items:center;justify-content:center;overflow:hidden')}>{av(sel, 100)}</div>
+                    <div style={css("font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:#15131a;text-transform:uppercase;margin-bottom:8px")}>{sel.name}</div>
+                    <div style={css('display:flex;flex-direction:column;gap:4px;background:rgba(0,0,0,.12);border-radius:12px;padding:9px 11px;margin-bottom:12px')}>
+                      {CATS.map(([k, label, emoji]) => <div key={k} style={css('display:flex;justify-content:space-between;align-items:center;color:#15131a')}><span style={css('font-size:13px')}>{emoji} {label}</span><span style={css('font-weight:700;letter-spacing:1px;font-size:12px')}>{'★'.repeat(Math.min(sel.stats[k], 5)) + (sel.stats[k] >= 6 ? '✦' : '') + '☆'.repeat(Math.max(0, 5 - sel.stats[k]))}</span></div>)}
+                    </div>
+                    <button onClick={() => setRosaGirl(null)} style={css("width:100%;padding:12px;border-radius:14px;background:#15131a;color:#f4f1ea;font-family:'Syne',sans-serif;font-weight:800;font-size:14px")}>CHIUDI</button>
+                    <div style={css('position:absolute;top:-20%;left:-12%;width:55%;height:140%;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.4) 50%,transparent 58%);pointer-events:none')}></div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })()}
